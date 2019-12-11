@@ -88,4 +88,14 @@ describe('Result', () => {
       });
     });
   });
+
+  describe('toPromise', () => {
+    test('it settles to a rejection of the Err value', async () => {
+      await expect(Err('uh oh').toPromise()).rejects.toBe('uh oh');
+    });
+
+    test('it settles to a resolution of the Ok value', async () => {
+      await expect(Ok('woo!').toPromise()).resolves.toBe('woo!');
+    });
+  });
 });

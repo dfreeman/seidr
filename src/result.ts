@@ -2,6 +2,8 @@ import SumType from 'sums-up';
 import Monad from './monad';
 import { Maybe, Nothing, Just } from './maybe';
 
+type Awaited<T> = T extends PromiseLike<infer R> ? R : T;
+
 class Result<L, R> extends SumType<{ Err: [L]; Ok: [R] }> implements Monad<R> {
   public static fromNullable<L, R>(error: L, x: R | undefined | null): Result<L, R> {
     return x ? Ok(x) : Err(error);
@@ -35,6 +37,13 @@ class Result<L, R> extends SumType<{ Err: [L]; Ok: [R] }> implements Monad<R> {
     return this.caseOf({
       Err: (_: L) => Nothing(),
       Ok: Just,
+    });
+  }
+
+  public toPromise(): Promise<Awaited<R>> {
+    return this.caseOf({
+      Err: err => Promise.reject(err),
+      Ok: data => Promise.resolve(data) as Promise<Awaited<R>>
     });
   }
 }
